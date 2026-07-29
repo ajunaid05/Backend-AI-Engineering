@@ -245,6 +245,35 @@ content-type: application/json
 
 {"id":4,"title":"Buy milk","done":false}
 
+## AI vs Me
+
+### Prompt Used
+
+(Paste your prompt here.)
+
+### What the AI did better
+
+- Organized the code into logical sections.
+- Used helper functions to reduce duplicate code.
+- Used FastAPI response models for better validation and Swagger documentation.
+- Generated task IDs more safely using the maximum existing ID.
+
+### What the AI got wrong
+
+- Returned additional data from the `/reset` endpoint that was not requested.
+- Added extra complexity through multiple response models and helper classes, which was unnecessary for this small assignment.
+
+### What my prompt forgot
+
+- Specify how task IDs should be generated after deletions.
+- Specify that search should be case-insensitive.
+- Define the exact response format for the reset endpoint.
+- Specify the JSON structure for validation errors.
+
+### Improved Prompt
+
+After refining my prompt with more detailed requirements about response formats, ID generation, and validation behaviour, the regenerated code more closely matched the expected implementation.
+
 ## Author
 
 **Ahmad Junaid**

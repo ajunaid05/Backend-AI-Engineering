@@ -2,13 +2,21 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from typing import Optional
 
 app=FastAPI(title="Task API",
     description="A simple CRUD API built with FastAPI.",
     version="1.0.0")
-tasks = [{"id" : 1,"title":"Analyze the document","done":True},
+tasks = [
+       {"id" : 1,"title":"Analyze the document","done":True},
        {"id" : 2,"title":"Make SRS","done":False},
-       {"id" : 3,"title":"Implementation","done":False}]
+       {"id" : 3,"title":"Implementation","done":False}
+]
+og_tasks=[
+       {"id" : 1,"title":"Analyze the document","done":True},
+       {"id" : 2,"title":"Make SRS","done":False},
+       {"id" : 3,"title":"Implementation","done":False}
+]
 
 # Create API(Post)
 
@@ -61,11 +69,32 @@ def health():
         "Status" : "OK"
     }
 
+#Get tasks filter and without filter
+@app.get("/tasks",
+         summary="Search Tasks",
+         description="Get all tasks, Done and Pending Tasks and search tasks with any perameter"
+         )
+def search_tasks(search: Optional[str] = None,done: Optional[bool] = None):
+    filtered_tasks=[]
+    if done is None and search is None:
+        return tasks
+    for task in tasks:
+        if done is not None and task["done"]!=done:
+            continue
+        if search is not None and search.lower() not in task['title'].lower():
+            continue
+        filtered_tasks.append(task)
+    return filtered_tasks
 
-@app.get("/tasks")
-def get_tasks():
+@app.get("/reset",
+         summary="Reset Tasks",
+         description="Instead of restarting server reset garbadge data with orignal.")
+def reset_tasks():
+    global tasks
+    tasks=[task.copy() for task in og_tasks]
     return tasks
 
+#Get (By ID)
 @app.get("/tasks/{id}",
          summary="Get a task",
          description="Returns a single task by its ID.")
@@ -123,3 +152,23 @@ def del_task(id: int):
         status_code=404,
         detail="Given ID not found."
     )
+
+ #Get Stats
+
+@app.get("/stats", summary="Get Tasks Statistics", description="Get Description of total tasks, pending ones and competed tasks")
+def task_stats():
+    competed=0
+    pending=0
+    for task in tasks:
+        if task['done']==True:
+            competed=competed+1
+        else:
+            pending=pending+1
+    return {
+        "Total" : len(tasks),
+        "done" : competed,
+        "pending" : pending
+    }
+
+
+        
