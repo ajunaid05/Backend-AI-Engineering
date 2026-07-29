@@ -3,7 +3,9 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
-app=FastAPI()
+app=FastAPI(title="Task API",
+    description="A simple CRUD API built with FastAPI.",
+    version="1.0.0")
 tasks = [{"id" : 1,"title":"Analyze the document","done":True},
        {"id" : 2,"title":"Make SRS","done":False},
        {"id" : 3,"title":"Implementation","done":False}]
@@ -24,7 +26,10 @@ async def exception_validator(request: Request, exc: RequestValidationError):
         }
     )
 
-@app.post("/tasks",status_code=201)
+@app.post("/tasks",
+          status_code=201,
+          summary="Create a new task",
+          description="Creates a new task with a unique ID and marks it as not completed.")
 def create_task(task:TaskCreate):
     if task.title.strip()=="":
 #  Exceptions Handling Manually
@@ -61,7 +66,9 @@ def health():
 def get_tasks():
     return tasks
 
-@app.get("/tasks/{id}")
+@app.get("/tasks/{id}",
+         summary="Get a task",
+         description="Returns a single task by its ID.")
 def get_task_id(id: int):
     for task in tasks:
         if task['id'] == id:
@@ -78,7 +85,10 @@ class TaskUpdate(BaseModel):
     title: str
     done: bool
 
-@app.put("/tasks/{id}")
+@app.put("/tasks/{id}",
+         summary="Update a task",
+         description="Updates the title and completion status of an existing task."
+         )
 def update_task(id: int,task: TaskUpdate):
 
     if task.title.strip() == "":
@@ -99,7 +109,11 @@ def update_task(id: int,task: TaskUpdate):
 
 # Delete API(DELETE)
 
-@app.delete("/tasks/{id}",status_code=204)
+@app.delete("/tasks/{id}",
+        status_code=204,
+        summary="Delete a task",
+        description="Deletes a task using its ID."
+    )
 def del_task(id: int):
     for existing_task in tasks:
         if existing_task['id'] == id:
