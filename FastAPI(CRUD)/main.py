@@ -4,6 +4,11 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 app=FastAPI()
+tasks = [{"id" : 1,"title":"Analyze the document","done":True},
+       {"id" : 2,"title":"Make SRS","done":False},
+       {"id" : 3,"title":"Implementation","done":False}]
+
+# Create API(Post)
 
 class TaskCreate(BaseModel):
     title : str
@@ -35,6 +40,8 @@ def create_task(task:TaskCreate):
     tasks.append(new_task)
     return new_task
 
+# Print API(Get)
+
 @app.get("/")
 def root():
     return {
@@ -49,9 +56,7 @@ def health():
         "Status" : "OK"
     }
 
-tasks = [{"id" : 1,"title":"Analyze the document","done":True},
-       {"id" : 2,"title":"Make SRS","done":False},
-       {"id" : 3,"title":"Implementation","done":False}]
+
 @app.get("/tasks")
 def get_tasks():
     return tasks
@@ -65,4 +70,42 @@ def get_task_id(id: int):
     raise HTTPException(
         status_code = 404,
         detail = f"Task with ID {id} not found."
+    )
+
+# Update API(Put)
+
+class TaskUpdate(BaseModel):
+    title: str
+    done: bool
+
+@app.put("/tasks/{id}")
+def update_task(id: int,task: TaskUpdate):
+
+    if task.title.strip() == "":
+        raise HTTPException(
+            status_code=400,
+            detail="title cannot be empty."
+        )
+    for existing_task in tasks:
+        if existing_task['id']==id:
+            existing_task['title'] = task.title
+            existing_task['done'] = task.done
+
+            return existing_task
+    raise HTTPException(
+        status_code=404,
+        detail="Task not found"
+    )
+
+# Delete API(DELETE)
+
+@app.delete("/tasks/{id}",status_code=204)
+def del_task(id: int):
+    for existing_task in tasks:
+        if existing_task['id'] == id:
+            tasks.remove(existing_task)
+            return None
+    raise HTTPException(
+        status_code=404,
+        detail="Given ID not found."
     )
