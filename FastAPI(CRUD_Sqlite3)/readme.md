@@ -39,7 +39,6 @@ A simple **Task Management CRUD API** built with **FastAPI** and **SQLite**. Thi
 ```text
 .
 ├── main.py
-├── tasks.db
 ├── requirements.txt
 ├── README.md
 ├── .gitignore
@@ -96,7 +95,7 @@ Clone the repository:
 ```bash
 git clone https://github.com/ajunaid05/Backend-AI-Engineering.git
 cd Backend-AI-Engineering
-cd "FastAPI(CRUD)"
+cd "FastAPI(CRUD_Sqlite3)"
 ```
 
 Create a virtual environment:
@@ -215,7 +214,6 @@ The SQLite database was also explored using DB Browser for SQLite.
 
 ```sql
 SELECT * FROM tasks;
-
 ---
 
 ## Learning Outcomes
@@ -252,8 +250,8 @@ All API endpoints generated automatically by FastAPI.
 
 Creating a new task using Swagger UI.
 
-![POST Request](Images/images-1.png)
-![POST Response](Images/images-2.png)
+![POST Request](Images/image-1.png)
+![POST Response](Images/image-2.png)
 
 ---
 

@@ -11,3 +11,5 @@
 # Environment variables
 .env
 
+# SQLite database
+*.db

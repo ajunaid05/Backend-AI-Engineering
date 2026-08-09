@@ -4,19 +4,24 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 
-app=FastAPI(title="Task API",
-    description="A simple CRUD API built with FastAPI.",
-    version="1.0.0")
 tasks = [
        {"id" : 1,"title":"Analyze the document","done":True},
        {"id" : 2,"title":"Make SRS","done":False},
        {"id" : 3,"title":"Implementation","done":False}
 ]
+
+
 og_tasks=[
        {"id" : 1,"title":"Analyze the document","done":True},
        {"id" : 2,"title":"Make SRS","done":False},
        {"id" : 3,"title":"Implementation","done":False}
 ]
+
+
+app=FastAPI(title="Task API",
+    description="A simple CRUD API built with FastAPI.",
+    version="1.0.0")
+
 
 # Create API(Post)
 
