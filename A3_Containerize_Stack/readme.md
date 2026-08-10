@@ -1,325 +1,331 @@
-# FastAPI CRUD API with SQLite
+# Backend AI Engineering — Assignment 3
 
-Backend AI Engineering – Assignment 2
+## Overview
 
-A simple **Task Management CRUD API** built with **FastAPI** and **SQLite**. This project extends the previous in-memory CRUD API by replacing the task list with persistent SQLite storage while keeping the same API endpoints and behaviour.
+A containerized Task Management CRUD API built with FastAPI and PostgreSQL. This project extends the previous SQLite-based CRUD API by replacing SQLite with PostgreSQL and containerizing the application and database using Docker Compose.
 
----
+The application provides RESTful CRUD endpoints, request validation, exception handling, Swagger documentation, persistent PostgreSQL storage, and a reproducible Docker-based development environment.
 
 ## Features
 
-* Create a new task
-* Retrieve, search, and filter tasks
-* Retrieve a task by ID
-* Update an existing task
-* Delete a task
-* Request validation using Pydantic
-* Custom exception handling
-* Interactive API documentation with Swagger UI
-* SQLite database persistence
-* Automatic database and table creation
-* Initial sample tasks inserted only when the database is empty
-* Data survives server restarts
-
----
+- Create a new task
+- Retrieve all tasks
+- Retrieve a task by ID
+- Update an existing task
+- Delete a task
+- Request validation using Pydantic
+- Custom validation error handling
+- HTTP exception handling
+- Interactive API documentation with Swagger UI
+- PostgreSQL database integration
+- Dockerized FastAPI application
+- Dockerized PostgreSQL database
+- Docker Compose orchestration
+- PostgreSQL health check
+- Persistent database storage using a Docker named volume
+- Database schema initialization through schema.sql
+- Environment-based database configuration
+- Data survives container restarts and docker compose down/up cycles
 
 ## Tech Stack
 
-* Python 3
-* FastAPI
-* Pydantic
-* Uvicorn
-* SQLite
-* Python `sqlite3` module
-
----
+- Python 3.12
+- FastAPI
+- Pydantic
+- Uvicorn
+- PostgreSQL 17
+- psycopg2-binary
+- python-dotenv
+- Docker
+- Docker Compose
 
 ## Project Structure
 
-```text
-.
+```
+A3_Containerize_Stack/
 ├── main.py
+├── repository.py
+├── schema.sql
 ├── requirements.txt
-├── README.md
+├── Dockerfile
+├── docker-compose.yml
+├── .env
+├── .env.example
 ├── .gitignore
+├── readme.md
 └── Images/
 ```
 
----
+## PostgreSQL Database
 
-## SQLite Database
+This version uses PostgreSQL instead of SQLite.
 
-This version uses SQLite instead of an in-memory Python list.
+PostgreSQL runs inside a Docker container named a3-postgres. The database is named tasks.
 
-SQLite was chosen because it is lightweight, requires no separate database server, and stores the database in a single file.
+Schema:
 
-The database file is:
-
-```text
-tasks.db
 ```
-
-When the application starts:
-
-* The database is created if it does not exist.
-* The `tasks` table is created if it does not exist.
-* Three example tasks are inserted only if the table is empty.
-
-The database schema is:
-
-```text
 tasks
-├── id      INTEGER PRIMARY KEY
-├── title   TEXT
-└── done    BOOLEAN
+├── id INTEGER PRIMARY KEY
+├── title TEXT NOT NULL
+└── done BOOLEAN NOT NULL DEFAULT FALSE
 ```
 
-Because tasks are stored in SQLite, they survive server restarts.
+Database data is stored in the Docker named volume a3_postgres_data. Therefore, removing and recreating containers does not remove the database data as long as the volume is retained.
 
----
+## Environment Variables
+
+The application uses environment variables for PostgreSQL configuration.
+
+Example:
+
+```
+POSTGRES_USER=your_username
+POSTGRES_PASSWORD=your_password
+POSTGRES_DB=tasks
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+```
+
+Inside Docker Compose, POSTGRES_HOST is db because db is the PostgreSQL service name on the Docker Compose network.
+
+Actual credentials are stored in .env and excluded from Git using .gitignore. .env.example contains placeholder values and is safe to commit.
+
+## Dockerfile
+
+The FastAPI application is packaged into a lightweight Python 3.12 image.
+
+The Dockerfile uses python:3.12-slim, sets /app as the working directory, installs requirements, copies the application source, exposes port 8000, and starts Uvicorn on 0.0.0.0:8000.
+
+## Docker Compose
+
+Docker Compose manages two services.
+
+**app:**
+- Builds the FastAPI application from the Dockerfile.
+- Runs the API on port 8000.
+- Receives PostgreSQL configuration through environment variables.
+- Depends on the database health check.
+
+**db:**
+- Uses PostgreSQL 17.
+- Runs on port 5432.
+- Stores data in the a3_postgres_data named volume.
+- Uses schema.sql as an initialization script.
+- Includes a pg_isready health check.
+
+The services communicate through the Docker Compose network. FastAPI connects to PostgreSQL using hostname db.
+
+## Database Persistence
+
+PostgreSQL data is persisted using:
+
+```
+a3_postgres_data:/var/lib/postgresql/data
+```
+
+Task records remain available after:
+
+```
+docker compose down
+docker compose up
+```
+
+Data is removed only if the volume is explicitly deleted, for example:
+
+```
+docker compose down -v
+```
 
 ## Installation
 
 Clone the repository:
 
-```bash
+```
 git clone https://github.com/ajunaid05/Backend-AI-Engineering.git
 cd Backend-AI-Engineering
-cd "FastAPI(CRUD_Sqlite3)"
+cd A3_Containerize_Stack
 ```
 
-Create a virtual environment:
+Make sure Docker Desktop is installed and running.
 
-```bash
-python -m venv .venv
+Create the .env file using .env.example and provide the required PostgreSQL configuration.
+
+## Run the Application
+
+Build and start:
+
+```
+docker compose up --build
 ```
 
-Activate the virtual environment.
+Run detached:
 
-**Windows**
-
-```bash
-.venv\Scripts\activate
+```
+docker compose up --build -d
 ```
 
-**Linux / macOS**
+Check containers:
 
-```bash
-source .venv/bin/activate
+```
+docker compose ps
 ```
 
-Install the dependencies:
+View application logs:
 
-```bash
-pip install -r requirements.txt
+```
+docker compose logs app
 ```
 
----
+View PostgreSQL logs:
 
-## Run the API
-
-Start the development server using:
-
-```bash
-uvicorn main:app --reload
+```
+docker compose logs db
 ```
 
-The API will be available at:
+Stop:
 
-```text
-http://127.0.0.1:8000
 ```
-
----
+docker compose down
+```
 
 ## API Documentation
 
-### Swagger UI
+Swagger UI: http://127.0.0.1:8000/docs
 
-```text
-http://127.0.0.1:8000/docs
-```
-
-### ReDoc
-
-```text
-http://127.0.0.1:8000/redoc
-```
-
----
+ReDoc: http://127.0.0.1:8000/redoc
 
 ## API Endpoints
 
-| Method | Endpoint      | Description                        |
-| ------ | ------------- | ----------------------------------- |
-| GET    | `/`           | API information                     |
-| GET    | `/health`     | Health check                        |
-| GET    | `/tasks`      | Retrieve, search, and filter tasks  |
-| GET    | `/tasks/{id}` | Retrieve a task by ID               |
-| POST   | `/tasks`      | Create a new task                   |
-| PUT    | `/tasks/{id}` | Update an existing task             |
-| DELETE | `/tasks/{id}` | Delete a task                       |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /tasks | Retrieve all tasks |
+| GET | /tasks/{id} | Retrieve a task by ID |
+| POST | /tasks | Create a new task |
+| PUT | /tasks/{id} | Update an existing task |
+| DELETE | /tasks/{id} | Delete a task |
 
----
+## Example API Request
 
-## Example API Call
+Create a task through Swagger UI or curl:
 
-Create a new task using `curl`:
-
-```bash
-curl -i -X POST http://127.0.0.1:8000/tasks -H "Content-Type: application/json" -d "{\"title\":\"Buy milk\"}"
+```
+curl -i -X POST http://127.0.0.1:8000/tasks -H "Content-Type: application/json" -d "{\"title\":\"Learn Docker\",\"done\":false}"
 ```
 
-### Example Output
+Example response:
 
-```http
-HTTP/1.1 201 Created
-date: Wed, 29 Jul 2026 13:57:55 GMT
-server: uvicorn
-content-length: 40
-content-type: application/json
-
-{"id":4,"title":"Buy milk","done":false}
+```json
+{
+  "id": 1,
+  "title": "Learn Docker",
+  "done": false
+}
 ```
-
----
 
 ## HTTP Status Codes
 
-| Status Code         | Description                          |
-| -------------------- | ------------------------------------ |
-| **200 OK**           | Request completed successfully       |
-| **201 Created**      | Resource created successfully        |
-| **204 No Content**   | Resource deleted successfully        |
-| **400 Bad Request**  | Invalid request or validation failed |
-| **404 Not Found**    | Requested task was not found         |
+| Code | Meaning |
+|------|---------|
+| 200 OK | Request completed successfully |
+| 201 Created | Resource created successfully |
+| 204 No Content | Resource deleted successfully |
+| 400 Bad Request | Invalid request or validation failed |
+| 404 Not Found | Requested task was not found |
 
----
+## Database Verification
 
-## SQL Queries Explored
+Access PostgreSQL directly:
 
-The SQLite database was also explored using DB Browser for SQLite.
+```
+docker exec -it a3-postgres psql -U ahmad -d tasks
+```
 
-### Retrieve all tasks
+Useful commands:
 
-```sql
+```
+\dt
+\d tasks
 SELECT * FROM tasks;
 ```
 
----
+These commands were used to verify the tasks table and stored records.
+
+## Testing Performed
+
+- PostgreSQL container starts successfully.
+- PostgreSQL reports a healthy status.
+- FastAPI container starts successfully.
+- FastAPI connects to PostgreSQL.
+- GET /tasks retrieves database records.
+- POST /tasks creates a task.
+- GET /tasks/{id} retrieves a task.
+- PUT /tasks/{id} updates a task.
+- DELETE /tasks/{id} deletes a task.
+- Missing task IDs return 404.
+- Invalid request data is rejected.
+- docker compose down followed by docker compose up preserves task data.
+- docker compose config successfully validates the Compose configuration.
 
 ## Learning Outcomes
 
-This project demonstrates:
+- RESTful API development with FastAPI
+- CRUD operations
+- Pydantic validation
+- HTTP exception handling
+- PostgreSQL integration with psycopg2
+- Parameterized SQL queries
+- Repository-layer database operations
+- Docker image creation
+- Docker containers
+- Docker networking
+- Docker Compose
+- Container health checks
+- Named Docker volumes
+- Persistent database storage
+- Environment variables
+- Multi-container architecture
+- Swagger UI testing
+- PostgreSQL inspection using psql
 
-* RESTful API development with FastAPI
-* CRUD operations (Create, Read, Update, Delete)
-* Request validation using Pydantic
-* Exception handling using `HTTPException`
-* Custom validation error handling
-* Proper use of HTTP status codes
-* Automatic API documentation with OpenAPI
-* Interactive API testing using Swagger UI
-* SQLite database integration
-* SQL queries using Python `sqlite3` module
-* Persistent data storage
-* Database-backed CRUD operations
+## Architecture
 
----
+```
+Client / Swagger UI
+        |
+        v
+FastAPI Container
+  (a3-fastapi)
+        |
+        | Docker Compose Network
+        v
+PostgreSQL Container
+  (a3-postgres)
+        |
+        v
+Named Docker Volume
+  (a3_postgres_data)
+```
 
-## Screenshots
+FastAPI handles HTTP requests and delegates database operations to repository.py. PostgreSQL provides persistent task storage.
 
-### Swagger UI
 
-All API endpoints generated automatically by FastAPI.
-
-![Swagger UI](Images/image.png)
-
----
-
-### Create Task (POST)
-
-Creating a new task using Swagger UI.
-
-![POST Request](Images/image-1.png)
-![POST Response](Images/image-2.png)
-
----
-
-### Retrieve Tasks (GET)
-
-Listing all available tasks after creating a new one.
-
-![GET Tasks](Images/image-3.png)
-![GET Response](Images/image-4.png)
-
----
-
-### Update Task (PUT)
-
-Updating an existing task and marking it as completed.
-
-![PUT Task](Images/image-5.png)
-![PUT Response](Images/image-6.png)
-
----
-
-### Delete Task (DELETE)
-
-Deleting a task successfully.
-
-![DELETE Task](Images/image-7.png)
-![DELETE Response](Images/image-8.png)
-
----
-
-### Verify Deletion (GET)
-
-Confirming the task has been removed.
-
-![DELETE Verification](Images/image-9.png)
-
-### DB Browser UI
-
-![DB Browser](Images/Database.png)
-
----
-
-## AI vs Me
-
-### Prompt Used
-
-<!-- TODO: paste the exact prompt you gave the AI here -->
-
-### What the AI did better
-
-* Organized the code into logical sections.
-* Used helper functions to reduce duplicate code.
-* Used FastAPI response models for better validation and Swagger documentation.
-* Generated task IDs more safely using the maximum existing ID.
-
-### What the AI got wrong
-
-* Returned additional data from the `/reset` endpoint that was not requested.
-* Added extra complexity through multiple response models and helper classes, which was unnecessary for this small assignment.
-
-### What my prompt forgot
-
-* Specify how task IDs should be generated after deletions.
-* Specify that search should be case-insensitive.
-* Define the exact response format for the reset endpoint.
-* Specify the JSON structure for validation errors.
-
-### Improved Prompt
-
-After refining my prompt with more detailed requirements about response formats, ID generation, and validation behaviour, the regenerated code more closely matched the expected implementation.
-
----
+**What I implemented and verified:**
+- Created the project structure.
+- Created and configured PostgreSQL.
+- Created schema.sql.
+- Implemented repository.py using psycopg2.
+- Migrated CRUD operations from SQLite to PostgreSQL.
+- Implemented FastAPI endpoints.
+- Created Dockerfile and docker-compose.yml.
+- Configured PostgreSQL health checks.
+- Configured persistent Docker storage.
+- Tested the API through Swagger UI.
+- Verified database persistence across docker compose down/up.
 
 ## Author
 
 **Ahmad Junaid**
 
-Backend AI Engineering – Assignment 2
-
+Backend AI Engineering — Assignment 3
 COMSATS University Lahore
