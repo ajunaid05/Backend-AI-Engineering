@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from supabase import create_client,Client
 
+from routers.auth import router as auth_router
+
 load_dotenv()
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -22,6 +24,8 @@ app = FastAPI(
     description= "FastAPI authentication API using Supabase Auth",
     version = "1.0.0"
 )
+
+app.include_router(auth_router)
 
 @app.get("/")
 def root():
