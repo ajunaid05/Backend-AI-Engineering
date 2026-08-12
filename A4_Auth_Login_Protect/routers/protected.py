@@ -1,33 +1,48 @@
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-router = APIRouter(tags=["Protected and Public"])
+from database import supabase
 
+router = APIRouter(tags=["Protected & Public"])
+security = HTTPBearer()
 
 @router.get("/public/info")
 def public_info():
     return {
-        "message": "Welcome! You are accessing public info"
+        "message": "Welcome stranger! This info is public."
     }
 
 
 @router.get("/protected/profile")
 def protected_profile(
-    authorization: str | None = Header(default=None)
+    credentials : HTTPAuthorizationCredentials = Depends(security)
 ):
-    if not authorization or not authorization.startswith("Bearer "):
+
+    
+
+    token = credentials.credentials
+
+    try:
+        response = supabase.auth.get_user(token)
+
+    except Exception as e:
+        print("Supabase verification error:", e)
+
         raise HTTPException(
             status_code=401,
-            detail="Access token required."
+            detail="Invalid or Expired token."
         )
 
-    token = authorization.split(" ", 1)[1]
-
-    if not token:
+    if response.user is None:
         raise HTTPException(
             status_code=401,
-            detail="Access token required."
+            detail="Invalid or Expired token."
         )
+
+    user = response.user
 
     return {
-        "message": "Token Accessed."
+        "id": user.id,
+        "email": user.email,
+        "created_at": user.created_at
     }
