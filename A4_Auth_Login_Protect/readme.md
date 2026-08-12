@@ -313,7 +313,27 @@ The protected endpoints use Bearer Token authentication and can be tested direct
 
 ![Swagger UI](Swagger.png)
 
-Replace swagger-authentication.png with the actual filename of your screenshot.
+### 1. Signup Endpoint
+![Signup Endpoint](Images/signup1.png.png)
+![](Images/signup2.png.png)
+
+### 2. Login Endpoint
+![Login Endpoint](Images/login1.png)
+![](Images/login2.png)
+
+### 3. Login Endpoint
+![Login Endpoint](Images/logout1.png)
+![](Images/logout2.png)
+
+### 4. Public Info Endpoint
+![Public Info Endpoint](Images/public.png)
+
+### 5. Protected Profile Endpoint
+![Protected Profile Endpoint](Images/protected.png)
+
+### 6. Protected Dashboard Endpoint
+![Protected Dashboard Endpoint](Images/dashboard.png)
+
 
 ## 🔒 Environment Variables
 
