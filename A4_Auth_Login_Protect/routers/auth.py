@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Depends
 from pydantic import BaseModel
-
 from database import supabase
-
+from dependencies import get_current_token
 router = APIRouter(prefix = "/auth", tags = ["Authentication"])
 
 class AuthRequest(BaseModel):
@@ -61,3 +60,9 @@ def login_user(credentials: AuthRequest):
         "access_token" : response.session.access_token,
         "refresh_token" : response.session.refresh_token
     }
+
+@router.post("/logout", status_code=204)
+def logout_user(token: str = Depends(get_current_token)):
+    supabase.auth.sign_out()
+
+    return
