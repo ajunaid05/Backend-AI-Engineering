@@ -3,4 +3,7 @@ __pycache__/
 *.pyc
 
 cache/
-output/
+
+output/*
+!output/books.json
+!output/run-report.json
