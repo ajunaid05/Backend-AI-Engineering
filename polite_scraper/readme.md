@@ -161,6 +161,10 @@ The scraper intentionally processes only the first three catalogue pages, so it 
 
 ---
 
-## Stage 6 Checkpoint
+## Author
 
-A stranger should be able to clone the public repository, follow the documented installation and run command, and obtain `books.json` plus `run-report.json` in under five minutes.
+**Ahmad Junaid**
+
+Backend AI Engineering – Assignment 1
+
+COMSATS University Islamabad
