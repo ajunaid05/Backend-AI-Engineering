@@ -13,3 +13,5 @@
 
 # SQLite database
 *.db
+
+cache/
